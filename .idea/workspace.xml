@@ -30,4 +30,10 @@
     </task>
     <servers />
   </component>
+  <component name="WindowStateProjectService">
+    <state x="421" y="130" key="FileChooserDialogImpl" timestamp="1606277435300">
+      <screen x="0" y="31" width="1280" height="689" />
+    </state>
+    <state x="421" y="130" key="FileChooserDialogImpl/0.31.1280.689@0.31.1280.689" timestamp="1606277435300" />
+  </component>
 </project>
