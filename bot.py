@@ -1,17 +1,9 @@
 import discord
 from discord.ext import commands
 import json
-import time
 import asyncio
 #import keep_alive
-from datetime import datetime,timezone,timedelta
-
-
-def now_hour():
-    dt1 = datetime.utcnow().replace(tzinfo=timezone.utc)
-    dt2 = dt1.astimezone(timezone(timedelta(hours=8)))  # 轉換時區 -> 東八區
-    return int(dt2.strftime("%H"))
-
+from functions import *
 
 with open('database.json', mode='r', encoding='utf8') as jfile:
     db = json.load(jfile)
@@ -24,13 +16,13 @@ bot = commands.Bot(command_prefix='sc!', intents=intents)
 @bot.event
 async def on_ready():
     print("------>> Bot is online <<------")
+    await Admin_auto()
 
 
 # ping
 @bot.command()
 async def ping(ctx):
     await ctx.send(f'{round(bot.latency * 1000)} (ms)')
-    await ctx.send('\*~\* Synthesizer hello!')
 
 
 # check member
@@ -40,19 +32,20 @@ async def m_c(ctx):
         print(member)
 
 
-# auto job activate
-@bot.command()
-async def re(ctx):
-    await ctx.send('Re-progress set!')
-    AdminRole = ctx.guild.get_role(int(db['Admin']))
+async def Admin_auto():
+    guild = bot.guilds[0]
+    cmd_channel = discord.utils.get(guild.text_channels, name='◉總指令區')
+
+    await cmd_channel.send('Re-progress set!')
+    AdminRole = guild.get_role(int(db['Admin']))
     while (1):
         temp_file = open('account_data.json', mode='r', encoding='utf8')
         ad = json.load(temp_file)  # account data
         temp_file.close()
 
-        if (now_hour() >= 21 or now_hour() <= 6):
+        if (now_hour() >= 21 or now_hour() <= 13):
             for i in range(len(ad['status'])):
-                user = await ctx.guild.fetch_member(int(ad['id'][i]))
+                user = await guild.fetch_member(int(ad['id'][i]))
                 if (ad['status'][i] == '1'):
                     await user.add_roles(AdminRole)
                 elif (ad['status'][i] == '0'):
@@ -70,13 +63,8 @@ async def acc(ctx):
 # check account_list
 @acc.command()
 async def list(ctx):
-    role_bool = int(0)
-    for role in ctx.author.roles:
-        if (str(role) == '總召'):
-            role_bool = int(1)
-            break
 
-    if (role_bool == int(0)):
+    if (role_check(ctx.author.roles, '總召') == False):
         await ctx.send('You can\'t use that command!')
         return
 
@@ -98,16 +86,13 @@ async def login(ctx):
     ad = json.load(temp_file)  # account data
     temp_file.close()
 
-    UserIndex = int(0)
-    UserExist = int(0)
+    UserIndex = int(-1)
+    try:
+        UserIndex = ad['id'].index(str(ctx.author.id))
+    except:
+        pass
 
-    for i in range(len(ad['id'])):
-        if (ad['id'][i] == str(ctx.author.id)):
-            UserExist = int(1)
-            UserIndex = int(i)
-            break
-
-    if (UserExist == int(0)):
+    if (UserIndex == -1):
         await ctx.author.send('You havn\'t register yet!')
         return
 
@@ -146,16 +131,13 @@ async def logout(ctx):
     ad = json.load(temp_file)  # account data
     temp_file.close()
 
-    UserIndex = int(0)
-    UserExist = int(0)
+    UserIndex = int(-1)
+    try:
+        UserIndex = ad['id'].index(str(ctx.author.id))
+    except:
+        pass
 
-    for i in range(len(ad['id'])):
-        if (ad['id'][i] == str(ctx.author.id)):
-            UserExist = int(1)
-            UserIndex = int(i)
-            break
-
-    if (UserExist == int(0)):
+    if (UserIndex == -1):
         await ctx.author.send('You havn\'t register yet!')
         return
 
@@ -178,10 +160,9 @@ async def register(ctx):
     ad = json.load(temp_file)  # account data
     temp_file.close()
 
-    for UserId in ad['id']:
-        if (str(ctx.author.id) == UserId):
-            await ctx.author.send('You\'ve already registered!')
-            return
+    if (str(ctx.author.id) in ad['id']):
+        await ctx.author.send('You\'ve already registered!')
+        return
 
     RegAcc = str()
     RegPs = str()
@@ -219,16 +200,13 @@ async def mani(ctx):
     ad = json.load(temp_file)  # account data
     temp_file.close()
 
-    UserIndex = int(0)
-    UserExist = int(0)
+    UserIndex = int(-1)
+    try:
+        UserIndex = ad['id'].index(str(ctx.author.id))
+    except:
+        pass
 
-    for i in range(len(ad['id'])):
-        if (ad['id'][i] == str(ctx.author.id)):
-            UserExist = int(1)
-            UserIndex = int(i)
-            break
-
-    if (UserExist == int(0)):
+    if (UserIndex == -1):
         await ctx.author.send('You havn\'t register yet!')
         return
 
