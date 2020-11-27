@@ -10,6 +10,13 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="hiddenUrls">
+      <set>
+        <option value="https://github.com/phantom0174/Synthesizer" />
+      </set>
+    </option>
+  </component>
   <component name="ProjectId" id="1kbvuwUsxyCg7Zf4ZfjNMRqkjAR" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -18,6 +25,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -40,5 +48,9 @@
       <screen x="0" y="31" width="1280" height="689" />
     </state>
     <state x="421" y="130" key="FileChooserDialogImpl/0.31.1280.689@0.31.1280.689" timestamp="1606290968478" />
+    <state x="135" y="30" key="SettingsEditor" timestamp="1606479362230">
+      <screen x="0" y="31" width="1280" height="689" />
+    </state>
+    <state x="135" y="30" key="SettingsEditor/0.31.1280.689@0.31.1280.689" timestamp="1606479362230" />
   </component>
 </project>
