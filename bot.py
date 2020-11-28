@@ -306,6 +306,24 @@ async def role_update(ctx, *, msg):
 
     await ctx.send('Role update complete!')
 
+
+#Integrator communication
+@bot.command()
+async def Syn_call(ctx, *, msg):
+    if(ctx.author.name != 'Integrator'):
+        return
+
+    para = msg.split(' ')
+    member = await ctx.guild.fetch_member(int(para[1]))
+    if(para[0] == 'member_levelling_index_warning'):
+        await member.send(
+            "Your levelling index has reached the warning range,"
+            "please try to participate in daily guild events!")
+        return
+    if(para[0] == 'member_levelling_index_outbreak'):
+        await member.send('Your levelling index has already reached the maximum, you will be kickout from the server!')
+        return
+
 #keep_alive.keep_alive()
 
 bot.run(db['TOKEN'])
