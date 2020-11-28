@@ -4,6 +4,7 @@ import json
 import asyncio
 #import keep_alive
 from functions import *
+import os
 
 with open('database.json', mode='r', encoding='utf8') as jfile:
     db = json.load(jfile)
@@ -43,7 +44,7 @@ async def Admin_auto():
         ad = json.load(temp_file)  # account data
         temp_file.close()
 
-        if (now_hour() >= 21 or now_hour() <= 13):
+        if (now_hour() >= 21 or now_hour() <= 6):
             for i in range(len(ad['status'])):
                 user = await guild.fetch_member(int(ad['id'][i]))
                 if (ad['status'][i] == '1'):
@@ -306,24 +307,6 @@ async def role_update(ctx, *, msg):
 
     await ctx.send('Role update complete!')
 
-
-#Integrator communication
-@bot.command()
-async def Syn_call(ctx, *, msg):
-    if(ctx.author.name != 'Integrator'):
-        return
-
-    para = msg.split(' ')
-    member = await ctx.guild.fetch_member(int(para[1]))
-    if(para[0] == 'member_levelling_index_warning'):
-        await member.send(
-            "Your levelling index has reached the warning range,"
-            "please try to participate in daily guild events!")
-        return
-    if(para[0] == 'member_levelling_index_outbreak'):
-        await member.send('Your levelling index has already reached the maximum, you will be kickout from the server!')
-        return
-
 #keep_alive.keep_alive()
 
-bot.run(db['TOKEN'])
+bot.run(os.environ.get("TOKEN"))
