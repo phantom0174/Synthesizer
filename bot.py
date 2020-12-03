@@ -1,17 +1,31 @@
-import discord
 from discord.ext import commands
-import json
-import asyncio
-#import keep_alive
 from functions import *
+#import keep_alive
+import sqlite3
+import discord
+import asyncio
+import json
 import os
 
-with open('database.json', mode='r', encoding='utf8') as jfile:
+with open('setting.json', mode='r', encoding='utf8') as jfile:
     db = json.load(jfile)
+
+connection = sqlite3.connect('DataBase.db')
+data = connection.cursor()
 
 intents = discord.Intents.all()
 
 bot = commands.Bot(command_prefix='sc!', intents=intents)
+
+def db_setup():
+    data.execute("""CREATE TABLE IF NOT EXISTS account (
+          Id INTEGER,
+          Name TEXT,
+          PWD TEXT,
+          Status INTEGER);""")
+
+    data.connection.commit()
+
 
 
 @bot.event
@@ -40,16 +54,17 @@ async def Admin_auto():
     await cmd_channel.send('Re-progress set!')
     AdminRole = guild.get_role(int(db['Admin']))
     while (1):
-        temp_file = open('account_data.json', mode='r', encoding='utf8')
-        ad = json.load(temp_file)  # account data
-        temp_file.close()
+        if (now_time_info('hour') >= 21 or now_time_info('hour') <= 6):
+            data.execute('SELECT Id, Status FROM account')
+            Accs = data.fetchall()
+            if(len(Accs) == 0):
+                continue
 
-        if (now_hour() >= 21 or now_hour() <= 6):
-            for i in range(len(ad['status'])):
-                user = await guild.fetch_member(int(ad['id'][i]))
-                if (ad['status'][i] == '1'):
+            for acc in Accs:
+                user = await guild.fetch_member(acc[0])
+                if (acc[1] == 1):
                     await user.add_roles(AdminRole)
-                elif (ad['status'][i] == '0'):
+                elif (acc[1] == 0):
                     await user.remove_roles(AdminRole)
 
         await asyncio.sleep(600)
@@ -69,40 +84,29 @@ async def list(ctx):
         await ctx.send('You can\'t use that command!')
         return
 
-    temp_file = open('account_data.json', mode='r', encoding='utf8')
-    ad = json.load(temp_file)  # account data
-    temp_file.close()
+    data.execute('SELECT * FROM account')
+    Accs = data.fetchall()
 
     account_info = str()
-    for i in range(len(ad['account'])):
-        account_info += ad['account'][i] + ', ' + ad['id'][i] + ', ' + ad['password'][i] + ', ' + ad['status'][i]
-        account_info += '\n'
+    for acc in Accs:
+        account_info += f'{acc[1]}({acc[0]})<{acc[2]}>: {acc[3]}\n'
 
     print(account_info)
 
 # account login
 @acc.command()
 async def login(ctx):
-    temp_file = open('account_data.json', mode='r', encoding='utf8')
-    ad = json.load(temp_file)  # account data
-    temp_file.close()
+    data.execute(f'SELECT * FROM account WHERE Id={ctx.author.id}')
+    info = data.fetchall()
 
-    UserIndex = int(-1)
-    try:
-        UserIndex = ad['id'].index(str(ctx.author.id))
-    except:
-        pass
-
-    if (UserIndex == -1):
+    if (len(info) == 0):
         await ctx.author.send('You havn\'t register yet!')
         return
 
-    if (ad['status'][UserIndex] == '1'):
+    if (info[3] == 1):
         await ctx.author.send('You\'ve already login!')
         return
 
-    Acc = str()
-    Ps = str()
 
     def check(message):
         return message.channel == ctx.author.dm_channel and message.author == ctx.author
@@ -113,66 +117,49 @@ async def login(ctx):
     await ctx.author.send('Enter password: ')
     Ps = (await bot.wait_for('message', check=check, timeout=30.0)).content
 
-    if (ad['account'][UserIndex] == Acc and ad['password'][UserIndex] == Ps):
-        ad['status'][UserIndex] = '1'
+    if (info[1] == Acc and info[2] == Ps):
+        data.execute(f'UPDATE account SET Status=1 WHERE Id={ctx.author.id};')
         await ctx.author.send('Login Success!')
     else:
-        ad['status'][UserIndex] = '0'
         await ctx.author.send('Login Failed.')
         return
 
-    temp_file = open('account_data.json', mode='w', encoding='utf8')
-    json.dump(ad, temp_file)
-    temp_file.close()
+    data.connection.commit()
 
 # account logout
 @acc.command()
 async def logout(ctx):
-    temp_file = open('account_data.json', mode='r', encoding='utf8')
-    ad = json.load(temp_file)  # account data
-    temp_file.close()
+    data.execute(f'SELECT * FROM account WHERE Id={ctx.author.id}')
+    info = data.fetchall()
 
-    UserIndex = int(-1)
-    try:
-        UserIndex = ad['id'].index(str(ctx.author.id))
-    except:
-        pass
-
-    if (UserIndex == -1):
+    if (len(info) == 0):
         await ctx.author.send('You havn\'t register yet!')
         return
 
-    if (ad['status'][UserIndex] == '0'):
+    if (info[3] == 0):
         await ctx.author.send('You\'ve already logout!')
         return
 
-    ad['status'][UserIndex] = '0'
+    data.execute(f'UPDATE account SET Status=0 WHERE Id={ctx.author.id};')
     await ctx.author.send('Logout Success!')
 
-    temp_file = open('account_data.json', mode='w', encoding='utf8')
-    json.dump(ad, temp_file)
-    temp_file.close()
+    data.connection.commit()
 
 # register account
 @acc.command()
 async def register(ctx):
-    await ctx.message.delete()
-    temp_file = open('account_data.json', mode='r', encoding='utf8')
-    ad = json.load(temp_file)  # account data
-    temp_file.close()
+    data.execute(f'SELECT * FROM account WHERE Id={ctx.author.id}')
+    info = data.fetchall()
 
-    if (str(ctx.author.id) in ad['id']):
+    if (len(info) != 0):
         await ctx.author.send('You\'ve already registered!')
         return
-
-    RegAcc = str()
-    RegPs = str()
 
     def check(message):
         return message.channel == ctx.author.dm_channel and message.author == ctx.author
 
     await ctx.author.send('Set account: ')
-    RegAcc = (await bot.wait_for('message', check=check, timeout=30.0)).content
+    RegName = (await bot.wait_for('message', check=check, timeout=30.0)).content
 
     await ctx.author.send('Set password: ')
     RegPs = (await bot.wait_for('message', check=check, timeout=30.0)).content
@@ -184,30 +171,18 @@ async def register(ctx):
         await ctx.author.send('Two password are not the same, please try again registration.')
         return
 
-    ad['account'].append(RegAcc)
-    ad['password'].append(RegPs)
-    ad['id'].append(str(ctx.author.id))
-    ad['status'].append('0')
+    data.execute(f'INSERT INTO account VALUES({ctx.author.id}, {RegName}, {RegPs}, 0);')
     await ctx.author.send('Register Success!')
 
-    temp_file = open('account_data.json', mode='w', encoding='utf8')
-    json.dump(ad, temp_file)
-    temp_file.close()
+    data.connection.commit()
 
 # account manipulation
 @acc.command()
 async def mani(ctx):
-    temp_file = open('account_data.json', mode='r', encoding='utf8')
-    ad = json.load(temp_file)  # account data
-    temp_file.close()
+    data.execute(f'SELECT * FROM account WHERE Id={ctx.author.id}')
+    info = data.fetchall()
 
-    UserIndex = int(-1)
-    try:
-        UserIndex = ad['id'].index(str(ctx.author.id))
-    except:
-        pass
-
-    if (UserIndex == -1):
+    if (len(info) == 0):
         await ctx.author.send('You havn\'t register yet!')
         return
 
@@ -243,15 +218,13 @@ async def mani(ctx):
         return
 
     if (AccChg == 'yes'):
-        ad['account'][UserIndex] = MAcc
+        data.execute(f'UPDATE account SET Name={MAcc} WHERE Id={ctx.author.id};')
     if (PsChg == 'yes'):
-        ad['password'][UserIndex] = MPs
+        data.execute(f'UPDATE account SET PWD={MPs} WHERE Id={ctx.author.id};')
 
     await ctx.author.send('Account manipulation success!')
 
-    temp_file = open('account_data.json', mode='w', encoding='utf8')
-    json.dump(ad, temp_file)
-    temp_file.close()
+    data.connection.commit()
 #===== group - account =====<<
 
 
@@ -306,6 +279,11 @@ async def role_update(ctx, *, msg):
                     await ctx.channel.send(f'{member.name}\'s role was updated to {new_role}!')
 
     await ctx.send('Role update complete!')
+
+@bot.event
+async def on_disconnect():
+    print('Bot disconnected')
+    data.connection.close()
 
 #keep_alive.keep_alive()
 
