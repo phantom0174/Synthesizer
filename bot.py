@@ -31,6 +31,7 @@ def db_setup():
 @bot.event
 async def on_ready():
     print("------>> Bot is online <<------")
+    db_setup()
     await Admin_auto()
 
 
@@ -171,7 +172,8 @@ async def register(ctx):
         await ctx.author.send('Two password are not the same, please try again registration.')
         return
 
-    data.execute(f'INSERT INTO account VALUES({ctx.author.id}, {RegName}, {RegPs}, 0);')
+    data.execute(f'INSERT INTO account VALUES("{ctx.author.id}", "{RegName}", "{RegPs}", 0);')
+
     await ctx.author.send('Register Success!')
 
     data.connection.commit()
@@ -218,9 +220,9 @@ async def mani(ctx):
         return
 
     if (AccChg == 'yes'):
-        data.execute(f'UPDATE account SET Name={MAcc} WHERE Id={ctx.author.id};')
+        data.execute(f'UPDATE account SET Name="{MAcc}" WHERE Id={ctx.author.id};')
     if (PsChg == 'yes'):
-        data.execute(f'UPDATE account SET PWD={MPs} WHERE Id={ctx.author.id};')
+        data.execute(f'UPDATE account SET PWD="{MPs}" WHERE Id={ctx.author.id};')
 
     await ctx.author.send('Account manipulation success!')
 
@@ -283,6 +285,7 @@ async def role_update(ctx, *, msg):
 @bot.event
 async def on_disconnect():
     print('Bot disconnected')
+    data.connection.commit()
     data.connection.close()
 
 #keep_alive.keep_alive()
