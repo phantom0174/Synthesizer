@@ -282,6 +282,25 @@ async def role_update(ctx, *, msg):
 
     await ctx.send('Role update complete!')
 
+# bots communication event
+@bot.listen()
+async def on_message(ctx):
+    if (ctx.author.bot == False or ctx.author == bot.user):
+        return
+
+    MsgCont = str(ctx.content).split(' ')
+    if(MsgCont[0] == 'sc!rrc'):
+        data.execute(f'SELECT Id FROM account WHERE Id={int(MsgCont[1])}')
+        info = data.fetchall()
+
+        coni_channel = discord.utils.get(ctx.guild.text_channels, name='bot-coni')
+        if(len(info) == 0):
+            await coni_channel.send('False')
+        else:
+            await coni_channel.send('True')
+        return
+
+
 @bot.event
 async def on_disconnect():
     print('Bot disconnected')
