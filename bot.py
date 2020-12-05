@@ -1,6 +1,7 @@
 from discord.ext import commands
 from functions import *
 #import keep_alive
+import statistics
 import sqlite3
 import discord
 import asyncio
@@ -71,7 +72,7 @@ async def Admin_auto():
                 elif (acc[1] == 0):
                     await user.remove_roles(AdminRole)
 
-        await asyncio.sleep(600)
+        await asyncio.sleep(300)
 
 
 #===== group - account =====>>
