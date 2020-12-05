@@ -17,6 +17,9 @@ intents = discord.Intents.all()
 
 bot = commands.Bot(command_prefix='sc!', intents=intents)
 
+_ToSQCS = discord.utils.get(bot.guilds[1].text_channels, name='sqcs-and-syn')
+_ToMV = discord.utils.get(bot.guilds[1].text_channels, name='syn-and-mv')
+
 def db_setup():
     data.execute("""CREATE TABLE IF NOT EXISTS account (
           Id INTEGER,
