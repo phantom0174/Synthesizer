@@ -1,11 +1,11 @@
 from discord.ext import commands
 from functions import *
 #import keep_alive
-import statistics
 import sqlite3
 import discord
 import asyncio
 import json
+import sys
 import os
 
 with open('setting.json', mode='r', encoding='utf8') as jfile:
@@ -18,10 +18,11 @@ intents = discord.Intents.all()
 
 bot = commands.Bot(command_prefix='sc!', intents=intents)
 
-_ToSQCS = discord.utils.get(bot.guilds[1].text_channels, name='sqcs-and-syn')
-_ToMV = discord.utils.get(bot.guilds[1].text_channels, name='syn-and-mv')
 
 def db_setup():
+    # data.execute('DROP TABLE account;')
+
+    '''
     data.execute("""CREATE TABLE IF NOT EXISTS account (
           Id INTEGER,
           Name TEXT,
@@ -29,13 +30,13 @@ def db_setup():
           Status INTEGER);""")
 
     data.connection.commit()
-
+    '''
 
 
 @bot.event
 async def on_ready():
     print("------>> Bot is online <<------")
-    db_setup()
+    # db_setup()
     await Admin_auto()
 
 
@@ -62,8 +63,6 @@ async def Admin_auto():
         if (now_time_info('hour') >= 21 or now_time_info('hour') <= 6):
             data.execute('SELECT Id, Status FROM account')
             Accs = data.fetchall()
-            if(len(Accs) == 0):
-                continue
 
             for acc in Accs:
                 user = await guild.fetch_member(acc[0])
@@ -71,20 +70,19 @@ async def Admin_auto():
                     await user.add_roles(AdminRole)
                 elif (acc[1] == 0):
                     await user.remove_roles(AdminRole)
+        await asyncio.sleep(600)
 
-        await asyncio.sleep(300)
 
-
-#===== group - account =====>>
-#account main group
+# ===== group - account =====>>
+# account main group
 @bot.group()
 async def acc(ctx):
     pass
 
+
 # check account_list
 @acc.command()
 async def list(ctx):
-
     if (role_check(ctx.author.roles, '總召') == False):
         await ctx.send('You can\'t use that command!')
         return
@@ -92,11 +90,14 @@ async def list(ctx):
     data.execute('SELECT * FROM account')
     Accs = data.fetchall()
 
+    print(Accs)
+
     account_info = str()
     for acc in Accs:
         account_info += f'{acc[1]}({acc[0]})<{acc[2]}>: {acc[3]}\n'
 
     print(account_info)
+
 
 # account login
 @acc.command()
@@ -111,7 +112,6 @@ async def login(ctx):
     if (info[3] == 1):
         await ctx.author.send('You\'ve already login!')
         return
-
 
     def check(message):
         return message.channel == ctx.author.dm_channel and message.author == ctx.author
@@ -131,6 +131,7 @@ async def login(ctx):
 
     data.connection.commit()
 
+
 # account logout
 @acc.command()
 async def logout(ctx):
@@ -149,6 +150,7 @@ async def logout(ctx):
     await ctx.author.send('Logout Success!')
 
     data.connection.commit()
+
 
 # register account
 @acc.command()
@@ -176,17 +178,21 @@ async def register(ctx):
         await ctx.author.send('Two password are not the same, please try again registration.')
         return
 
-    data.execute(f'INSERT INTO account VALUES("{ctx.author.id}", "{RegName}", "{RegPs}", 0);')
+    # data.execute(f'INSERT INTO account VALUES({ctx.author.id}, {RegName}, {RegPs}, 0);')
+    data.execute(f'INSERT INTO account (id, Name, PWD, Status) VALUES ("{ctx.author.id}", "{RegName}", "{RegPs}", 0);')
 
     await ctx.author.send('Register Success!')
 
     data.connection.commit()
 
+
 # account manipulation
 @acc.command()
 async def mani(ctx):
-    data.execute(f'SELECT * FROM account WHERE Id={ctx.author.id}')
+    data.execute(f'SELECT * FROM account WHERE Id="{ctx.author.id}"')
     info = data.fetchall()
+
+    print(info)
 
     if (len(info) == 0):
         await ctx.author.send('You havn\'t register yet!')
@@ -231,7 +237,9 @@ async def mani(ctx):
     await ctx.author.send('Account manipulation success!')
 
     data.connection.commit()
-#===== group - account =====<<
+
+
+# ===== group - account =====<<
 
 
 # department role update
@@ -286,30 +294,24 @@ async def role_update(ctx, *, msg):
 
     await ctx.send('Role update complete!')
 
-# bots communication event
-@bot.listen()
-async def on_message(ctx):
-    if (ctx.author.bot == False or ctx.author == bot.user):
+
+@bot.command()
+async def safe_stop(ctx):
+    if (role_check(ctx.author.roles, '總召') == False):
+        await ctx.send('You can\'t use that command!')
         return
 
-    MsgCont = str(ctx.content).split(' ')
-    if(MsgCont[0] == 'sc!rrc'):
-        data.execute(f'SELECT Id FROM account WHERE Id={int(MsgCont[1])}')
-        info = data.fetchall()
-
-        coni_channel = discord.utils.get(ctx.guild.text_channels, name='bot-coni')
-        if(len(info) == 0):
-            await coni_channel.send('False')
-        else:
-            await coni_channel.send('True')
-        return
+    print('The bot has stopped!')
+    data.connection.commit()
+    data.connection.close()
+    sys.exit(0)
 
 
 @bot.event
 async def on_disconnect():
     print('Bot disconnected')
     data.connection.commit()
-    data.connection.close()
+
 
 #keep_alive.keep_alive()
 
