@@ -65,9 +65,7 @@ async def m_c(ctx):
 
 async def Admin_auto():
     guild = bot.guilds[0]
-    cmd_channel = discord.utils.get(guild.text_channels, name='◉總指令區')
 
-    await cmd_channel.send('Re-progress set!')
     AdminRole = guild.get_role(int(db['Admin']))
     while (1):
         if (now_time_info('hour') >= 21 or now_time_info('hour') <= 6):
@@ -81,6 +79,7 @@ async def Admin_auto():
                 elif (acc[1] == 0):
                     await user.remove_roles(AdminRole)
         await asyncio.sleep(600)
+        await _Report.send(f'[Update]Guild logined member admin role. {now_time_info("whole")}')
 
 
 # ===== group - account =====>>
@@ -107,6 +106,8 @@ async def list(ctx):
         account_info += f'{acc[1]}({acc[0]})<{acc[2]}>: {acc[3]}\n'
 
     print(account_info)
+
+    await _Report.send(f'[Command]Group acc - list used by member {ctx.author.id}. {now_time_info("whole")}')
 
 
 # account login
@@ -141,6 +142,8 @@ async def login(ctx):
 
     data.connection.commit()
 
+    await _Report.send(f'[Command]Group acc - login used by member {ctx.author.id}. {now_time_info("whole")}')
+
 
 # account logout
 @acc.command()
@@ -160,6 +163,8 @@ async def logout(ctx):
     await ctx.author.send('Logout Success!')
 
     data.connection.commit()
+
+    await _Report.send(f'[Command]Group acc - logout used by member {ctx.author.id}. {now_time_info("whole")}')
 
 
 # register account
@@ -194,6 +199,8 @@ async def register(ctx):
     await ctx.author.send('Register Success!')
 
     data.connection.commit()
+
+    await _Report.send(f'[Command]Group acc - register used by member {ctx.author.id}. {now_time_info("whole")}')
 
 
 # account manipulation
@@ -247,6 +254,8 @@ async def mani(ctx):
     await ctx.author.send('Account manipulation success!')
 
     data.connection.commit()
+
+    await _Report.send(f'[Command]Group acc - mani used by member {ctx.author.id}. {now_time_info("whole")}')
 
 
 # ===== group - account =====<<
@@ -303,6 +312,8 @@ async def role_update(ctx, *, msg):
                     await ctx.channel.send(f'{member.name}\'s role was updated to {new_role}!')
 
     await ctx.send('Role update complete!')
+
+    await _Report.send(f'[Command]role_update used by member {ctx.author.id}. {now_time_info("whole")}')
 
 
 @bot.command()
