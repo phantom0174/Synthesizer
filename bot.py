@@ -78,8 +78,9 @@ async def Admin_auto():
                     await user.add_roles(AdminRole)
                 elif (acc[1] == 0):
                     await user.remove_roles(AdminRole)
-        await asyncio.sleep(600)
+
         await _Report.send(f'[Update]Guild logined member admin role. {now_time_info("whole")}')
+        await asyncio.sleep(600)
 
 
 # ===== group - account =====>>
