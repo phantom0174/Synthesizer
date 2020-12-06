@@ -18,6 +18,9 @@ intents = discord.Intents.all()
 
 bot = commands.Bot(command_prefix='sc!', intents=intents)
 
+global _ToSQCS
+global _ToMV
+global _Report
 
 def db_setup():
     # data.execute('DROP TABLE account;')
@@ -35,6 +38,13 @@ def db_setup():
 
 @bot.event
 async def on_ready():
+    global _ToSQCS
+    global _ToMV
+    global _Report
+
+    _ToSQCS = discord.utils.get(bot.guilds[1].text_channels, name='sqcs-and-syn')
+    _ToMV = discord.utils.get(bot.guilds[1].text_channels, name='syn-and-mv')
+    _Report = discord.utils.get(bot.guilds[1].text_channels, name='syn-report')
     print("------>> Bot is online <<------")
     # db_setup()
     await Admin_auto()
@@ -109,7 +119,7 @@ async def login(ctx):
         await ctx.author.send('You havn\'t register yet!')
         return
 
-    if (info[3] == 1):
+    if (info[0][3] == 1):
         await ctx.author.send('You\'ve already login!')
         return
 
@@ -122,7 +132,7 @@ async def login(ctx):
     await ctx.author.send('Enter password: ')
     Ps = (await bot.wait_for('message', check=check, timeout=30.0)).content
 
-    if (info[1] == Acc and info[2] == Ps):
+    if (info[0][1] == Acc and info[0][2] == Ps):
         data.execute(f'UPDATE account SET Status=1 WHERE Id={ctx.author.id};')
         await ctx.author.send('Login Success!')
     else:
@@ -142,7 +152,7 @@ async def logout(ctx):
         await ctx.author.send('You havn\'t register yet!')
         return
 
-    if (info[3] == 0):
+    if (info[0][3] == 0):
         await ctx.author.send('You\'ve already logout!')
         return
 
