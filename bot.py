@@ -26,7 +26,7 @@ def db_setup():
 
     data.execute("""CREATE TABLE IF NOT EXISTS cadre_apply (
               Id INTEGER,
-              Apply_Cadre TEXT
+              Apply_Cadre TEXT,
               Apply_Time TEXT);""")
 
     data.connection.commit()
@@ -50,8 +50,9 @@ async def on_ready():
     _ToSQCS = discord.utils.get(bot.guilds[1].text_channels, name='sqcs-and-syn')
     _ToMV = discord.utils.get(bot.guilds[1].text_channels, name='syn-and-mv')
     _Report = discord.utils.get(bot.guilds[1].text_channels, name='syn-report')
+
     print("------>> Bot is online <<------")
-    # db_setup()
+    db_setup()
     await Admin_auto()
 
 
@@ -71,7 +72,7 @@ async def m_c(ctx):
 async def Admin_auto():
     guild = bot.guilds[0]
 
-    AdminRole = guild.get_role(int(db['Admin']))
+    AdminRole = guild.get_role(db['Admin'])
     while (1):
         if (now_time_info('hour') >= 21 and now_time_info('hour') <= 6):
             data.execute('SELECT Id, Status FROM account')
@@ -266,6 +267,7 @@ async def mani(ctx):
 # ===== group - account =====<<
 
 
+
 # ===== group - cadre application =====>>
 @bot.group()
 async def ca(ctx):
@@ -273,8 +275,11 @@ async def ca(ctx):
 
 @ca.command()
 async def apply(ctx, msg):
+    if(ctx.channel.id != 774794670034124850):
+        return
+
     applicant = ctx.author.id
-    if(cadre_check(msg, ['副召', '網管', '議程', '管理', '公關', '美宣']) == False):
+    if(cadre_trans(msg) == -1):
         await ctx.send(f'There are no cadre called {msg}!')
         return
 
@@ -287,11 +292,13 @@ async def apply(ctx, msg):
         return
 
     apply_time = now_time_info("whole")
-    data.execute(f'INSERT INTO cadre_apply VALUES({applicant}, {msg}, {apply_time});')
+    data.execute(f'INSERT INTO cadre_apply VALUES({applicant}, "{msg}", "{apply_time}");')
     data.connection.commit()
 
     await ctx.send(f'Application committed!\n'
                    f'Id: {applicant}, Apply Cadre: {msg}, Apply Time: {apply_time}')
+
+    await _Report.send(f'[Command]Group ca - apply used by member {ctx.author.id}. {now_time_info("whole")}')
 
 @ca.command()
 async def list(ctx):
@@ -312,6 +319,8 @@ async def list(ctx):
 
     await ctx.author.send(applies)
 
+    await _Report.send(f'[Command]Group ca - list used by member {ctx.author.id}. {now_time_info("whole")}')
+
 
 @ca.command()
 async def permit(ctx, msg):
@@ -326,24 +335,33 @@ async def permit(ctx, msg):
         await ctx.send(f'There are no applicant whose id is {msg}!')
         return
 
-    if(info[0][1] == '副召'):
-        apply_role = ctx.guild.get_role(int(db['department_id'][0]))
-    elif(info[0][1] == '網管'):
-        apply_role = ctx.guild.get_role(int(db['department_id'][2]))
-    elif (info[0][1] == '議程'):
-        apply_role = ctx.guild.get_role(int(db['department_id'][4]))
-    elif (info[0][1] == '管理'):
-        apply_role = ctx.guild.get_role(int(db['department_id'][5]))
-    elif (info[0][1] == '公關'):
-        apply_role = ctx.guild.get_role(int(db['department_id'][3]))
-    elif (info[0][1] == '美宣'):
-        apply_role = ctx.guild.get_role(int(db['department_id'][1]))
+    apply_role = cadre_trans(info[0][1])
+    cadre_role = ctx.guild.get_role(db['cadre_id'][apply_role])
 
+    member = await ctx.guild.fetch_member(info[0][0])
+    await member.add_roles(cadre_role)
 
+    await ctx.author.send(f'You\'ve permitted user {info[0][0]} to join cadre {info[0][1]}!')
+    await member.send(f'You\'ve been permitted to join cadre {info[0][1]}!')
 
+    data.execute(f'DELETE FROM cadre_apply WHERE Id={info[0][0]};')
+    data.connection.commit()
 
+    await _Report.send(f'[Command]Group ca - permit used by member {ctx.author.id}. {now_time_info("whole")}')
 
+@ca.command()
+async def search(ctx, msg):
+    data.execute(f'SELECT * FROM cadre_apply WHERE Id={msg};')
+    info = data.fetchall()
 
+    if(len(info) == 0):
+        await ctx.send(f'There are no applicant whose Id is {msg}!')
+        return
+
+    member = await ctx.guild.fetch_member(info[0][0])
+    await ctx.send(f'{member.name}: {info[0][1]}, {info[0][2]}')
+
+    await _Report.send(f'[Command]Group ca - search used by member {ctx.author.id}. {now_time_info("whole")}')
 
 # ===== group - cadre application =====<<
 
