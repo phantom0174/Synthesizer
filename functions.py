@@ -14,9 +14,22 @@ def now_time_info(mode):
         return int(dt2.isoweekday())
 
 def role_check(roles, t_role):
-    Exist = bool(False)
     for role in roles:
-        if(role.name == t_role):
-            Exist = bool(True)
-            break
-    return Exist
+        for mrole in t_role:
+            if(role.name == mrole):
+                return True
+
+    return False
+
+def cadre_check(t_cadre, list):
+    for cadre in list:
+        if(cadre == t_cadre):
+            return True
+    return False
+
+def cadre_index_trans(cadre):
+    if(cadre == '副召'):
+        return 0
+    elif(cadre == 0):
+        return '副召'
+    elif(cadre == '')

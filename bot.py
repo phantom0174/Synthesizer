@@ -23,7 +23,13 @@ global _ToMV
 global _Report
 
 def db_setup():
-    # data.execute('DROP TABLE account;')
+
+    data.execute("""CREATE TABLE IF NOT EXISTS cadre_apply (
+              Id INTEGER,
+              Apply_Cadre TEXT
+              Apply_Time TEXT);""")
+
+    data.connection.commit()
 
     '''
     data.execute("""CREATE TABLE IF NOT EXISTS account (
@@ -32,7 +38,6 @@ def db_setup():
           PWD TEXT,
           Status INTEGER);""")
 
-    data.connection.commit()
     '''
 
 
@@ -79,7 +84,7 @@ async def Admin_auto():
                 elif (acc[1] == 0):
                     await user.remove_roles(AdminRole)
             await _Report.send(f'[Update]Guild logined member admin role. {now_time_info("whole")}')
-        
+
         await asyncio.sleep(600)
 
 
@@ -93,7 +98,7 @@ async def acc(ctx):
 # check account_list
 @acc.command()
 async def list(ctx):
-    if (role_check(ctx.author.roles, '總召') == False):
+    if (role_check(ctx.author.roles, ['總召']) == False):
         await ctx.send('You can\'t use that command!')
         return
 
@@ -258,8 +263,89 @@ async def mani(ctx):
 
     await _Report.send(f'[Command]Group acc - mani used by member {ctx.author.id}. {now_time_info("whole")}')
 
-
 # ===== group - account =====<<
+
+
+# ===== group - cadre application =====>>
+@bot.group()
+async def ca(ctx):
+    pass
+
+@ca.command()
+async def apply(ctx, msg):
+    applicant = ctx.author.id
+    if(cadre_check(msg, ['副召', '網管', '議程', '管理', '公關', '美宣']) == False):
+        await ctx.send(f'There are no cadre called {msg}!')
+        return
+
+    data.execute(f'SELECT * FROM cadre_apply WHERE Id={applicant};')
+    info = data.fetchall()
+
+    if(len(info) != 0):
+        await ctx.send(f'You\'ve already made a application!\n'
+                       f'Id: {info[0][0]}, Apply Cadre: {info[0][1]}, Apply Time: {info[0][2]}')
+        return
+
+    apply_time = now_time_info("whole")
+    data.execute(f'INSERT INTO cadre_apply VALUES({applicant}, {msg}, {apply_time});')
+    data.connection.commit()
+
+    await ctx.send(f'Application committed!\n'
+                   f'Id: {applicant}, Apply Cadre: {msg}, Apply Time: {apply_time}')
+
+@ca.command()
+async def list(ctx):
+    if(role_check(ctx.author.roles, ['總召', 'Administrator']) == False):
+        await ctx.send('You can\'t use this command!')
+        return
+
+    data.execute('SELECT * FROM cadre_apply;')
+    info = data.fetchall()
+
+    applies = str()
+    for apply in info:
+        member = await bot.fetch_user(apply[0])
+        applies += f'{member.name}: {apply[1]}, {apply[2]}\n'
+
+    if(len(applies) == 0):
+        applies = 'There are no application!'
+
+    await ctx.author.send(applies)
+
+
+@ca.command()
+async def permit(ctx, msg):
+    if (role_check(ctx.author.roles, ['總召', 'Administrator']) == False):
+        await ctx.send('You can\'t use this command!')
+        return
+
+    data.execute(f'SELECT Id, Apply_Cadre FROM cadre_apply WHERE Id={int(msg)};')
+    info = data.fetchall()
+
+    if(len(info) == 0):
+        await ctx.send(f'There are no applicant whose id is {msg}!')
+        return
+
+    if(info[0][1] == '副召'):
+        apply_role = ctx.guild.get_role(int(db['department_id'][0]))
+    elif(info[0][1] == '網管'):
+        apply_role = ctx.guild.get_role(int(db['department_id'][2]))
+    elif (info[0][1] == '議程'):
+        apply_role = ctx.guild.get_role(int(db['department_id'][4]))
+    elif (info[0][1] == '管理'):
+        apply_role = ctx.guild.get_role(int(db['department_id'][5]))
+    elif (info[0][1] == '公關'):
+        apply_role = ctx.guild.get_role(int(db['department_id'][3]))
+    elif (info[0][1] == '美宣'):
+        apply_role = ctx.guild.get_role(int(db['department_id'][1]))
+
+
+
+
+
+
+
+# ===== group - cadre application =====<<
 
 
 # department role update
@@ -319,7 +405,7 @@ async def role_update(ctx, *, msg):
 
 @bot.command()
 async def safe_stop(ctx):
-    if (role_check(ctx.author.roles, '總召') == False):
+    if (role_check(ctx.author.roles, ['總召']) == False):
         await ctx.send('You can\'t use that command!')
         return
 
