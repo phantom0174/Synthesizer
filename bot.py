@@ -68,7 +68,7 @@ async def Admin_auto():
 
     AdminRole = guild.get_role(int(db['Admin']))
     while (1):
-        if (now_time_info('hour') >= 21 or now_time_info('hour') <= 6):
+        if (now_time_info('hour') >= 21 and now_time_info('hour') <= 6):
             data.execute('SELECT Id, Status FROM account')
             Accs = data.fetchall()
 
@@ -78,8 +78,8 @@ async def Admin_auto():
                     await user.add_roles(AdminRole)
                 elif (acc[1] == 0):
                     await user.remove_roles(AdminRole)
-
-        await _Report.send(f'[Update]Guild logined member admin role. {now_time_info("whole")}')
+            await _Report.send(f'[Update]Guild logined member admin role. {now_time_info("whole")}')
+        
         await asyncio.sleep(600)
 
 
