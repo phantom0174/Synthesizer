@@ -91,7 +91,7 @@ def getChannel(target):
     global _ToMV
     global _Report
 
-    if target == '_ToSyn':
+    if target == '_ToSQCS':
         return _ToSQCS
     elif target == '_ToMV':
         return _ToMV

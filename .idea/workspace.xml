@@ -42,7 +42,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../SQCS_bot" />
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
@@ -88,10 +88,10 @@
       <screen x="0" y="31" width="1280" height="689" />
     </state>
     <state x="371" y="121" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.31.1280.689@0.31.1280.689" timestamp="1606982407453" />
-    <state x="421" y="130" key="FileChooserDialogImpl" timestamp="1606493184488">
+    <state x="421" y="130" key="FileChooserDialogImpl" timestamp="1607412430103">
       <screen x="0" y="31" width="1280" height="689" />
     </state>
-    <state x="421" y="130" key="FileChooserDialogImpl/0.31.1280.689@0.31.1280.689" timestamp="1606493184488" />
+    <state x="421" y="130" key="FileChooserDialogImpl/0.31.1280.689@0.31.1280.689" timestamp="1607412430103" />
     <state x="135" y="30" key="SettingsEditor" timestamp="1606479362230">
       <screen x="0" y="31" width="1280" height="689" />
     </state>
