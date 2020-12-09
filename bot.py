@@ -2,6 +2,8 @@ from discord.ext import commands
 from core.setup import *
 from functions import *
 # import keep_alive
+import sqlitebck
+import sqlite3
 import discord
 import asyncio
 import sys
@@ -33,6 +35,22 @@ async def Auto_task():
                 elif acc[1] == 0:
                     await user.remove_roles(AdminRole)
             await getChannel('_Report').send(f'[Update]Guild logined member admin role. {now_time_info("whole")}')
+
+        # db backup
+        temp_file = open('dyn_setting.json', mode='r', encoding='utf8')
+        dyn = json.load(temp_file)
+        temp_file.close()
+
+        if dyn['ldbh'] != now_time_info('hour'):
+            file_name = 'db_backup/' + str(now_time_info('hour')) + '_backup.db'
+            bck_db_conn = sqlite3.connect(file_name)
+            sqlitebck.copy(connection, bck_db_conn)
+
+            dyn['ldbh'] = now_time_info('hour')
+
+            temp_file = open('dyn_setting.json', mode='w', encoding='utf8')
+            json.dump(dyn, temp_file)
+            temp_file.close()
 
         await asyncio.sleep(600)
 
