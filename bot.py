@@ -1,12 +1,9 @@
+# import keep_alive
+from core.task import *
 from discord.ext import commands
 from core.setup import *
 from functions import *
-# import keep_alive
-import sqlitebck
-import sqlite3
 import discord
-import asyncio
-import json
 import sys
 import os
 
@@ -17,47 +14,11 @@ bot = commands.Bot(command_prefix='sc!', intents=intents)
 async def on_ready():
     print("------>> Bot is online <<------")
     await setChannel(bot)
-    await Auto_task()
-
-
-async def Auto_task():
-    guild = bot.guilds[0]
-
-    AdminRole = guild.get_role(db['Admin'])
-    while True:
-        if 21 <= now_time_info('hour') <= 23 or 0 <= now_time_info('hour') <= 6:
-            data.execute('SELECT Id, Status FROM account;')
-            Accs = data.fetchall()
-
-            for acc in Accs:
-                user = await guild.fetch_member(acc[0])
-                if acc[1] == 1:
-                    await user.add_roles(AdminRole)
-                elif acc[1] == 0:
-                    await user.remove_roles(AdminRole)
-            await getChannel('_Report').send(f'[Update]Guild logined member admin role. {now_time_info("whole")}')
-
-        # db backup
-        temp_file = open('dyn_setting.json', mode='r', encoding='utf8')
-        dyn = json.load(temp_file)
-        temp_file.close()
-
-        if dyn['ldbh'] != now_time_info('hour'):
-            file_name = 'db_backup/' + str(now_time_info('hour')) + '_backup.db'
-            bck_db_conn = sqlite3.connect(file_name)
-            await asyncio.sleep(20)
-            sqlitebck.copy(connection, bck_db_conn)
-
-            dyn['ldbh'] = now_time_info('hour')
-
-            temp_file = open('dyn_setting.json', mode='w', encoding='utf8')
-            json.dump(dyn, temp_file)
-            temp_file.close()
-
-        await asyncio.sleep(600)
+    await Auto_task(bot)
 
 
 @bot.command()
+@commands.has_any_role('總召', 'Administrator')
 async def load(ctx, msg):
     try:
         bot.load_extension(f'cogs.{msg}')
@@ -67,6 +28,7 @@ async def load(ctx, msg):
 
 
 @bot.command()
+@commands.has_any_role('總召', 'Administrator')
 async def unload(ctx, msg):
     try:
         bot.unload_extension(f'cogs.{msg}')
@@ -76,8 +38,9 @@ async def unload(ctx, msg):
 
 
 @bot.command()
+@commands.has_any_role('總召', 'Administrator')
 async def reload(ctx, msg):
-    if (msg != '*'):
+    if msg != '*':
         try:
             bot.reload_extension(f'cogs.{msg}')
             await ctx.send(f':white_check_mark: Extension {msg} reloaded.')
@@ -89,18 +52,10 @@ async def reload(ctx, msg):
                 bot.reload_extension(f'cogs.{filename[:-3]}')
 
 
-for filename in os.listdir('./cogs'):
-    if filename.endswith('.py') and filename != 'setup.py':
-        bot.load_extension(f'cogs.{filename[:-3]}')
-
-
 @bot.command()
+@commands.has_any_role('總召')
 async def safe_stop(ctx):
-    if not role_check(ctx.author.roles, ['總召']):
-        await ctx.send('You can\'t use that command!')
-        return
-
-    print('The bot has stopped!')
+    print(':white_check_mark: The bot has stopped!')
     data.connection.commit()
     data.connection.close()
     sys.exit(0)
@@ -110,6 +65,11 @@ async def safe_stop(ctx):
 async def on_disconnect():
     print('Bot disconnected')
     data.connection.commit()
+
+
+for filename in os.listdir('./cogs'):
+    if filename.endswith('.py') and filename != 'setup.py':
+        bot.load_extension(f'cogs.{filename[:-3]}')
 
 
 # keep_alive.keep_alive()

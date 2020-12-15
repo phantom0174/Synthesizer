@@ -1,6 +1,5 @@
-import discord
-import sqlite3
 import json
+import sqlite3
 
 with open('setting.json', mode='r', encoding='utf8') as jfile:
     db = json.load(jfile)

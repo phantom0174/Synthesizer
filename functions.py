@@ -1,9 +1,5 @@
 from datetime import datetime, timezone, timedelta
-from math import *
 import discord
-import asyncio
-import json
-
 global _ToSQCS
 global _ToMV
 global _Report

@@ -1,8 +1,7 @@
-from core.classes import Cog_Extension
 from discord.ext import commands
-from functions import *
+from core.classes import Cog_Extension
 from core.setup import *
-import discord
+from functions import *
 
 
 class Account(Cog_Extension):
@@ -13,10 +12,8 @@ class Account(Cog_Extension):
 
     # check account_list
     @acc.command()
+    @commands.has_any_role('總召', 'Administrator')
     async def list(self, ctx):
-        if not role_check(ctx.author.roles, ['總召']):
-            await ctx.send('You can\'t use that command!')
-            return
 
         data.execute('SELECT * FROM account')
         Accs = data.fetchall()
@@ -38,11 +35,11 @@ class Account(Cog_Extension):
         info = data.fetchall()
 
         if len(info) == 0:
-            await ctx.author.send('You havn\'t register yet!')
+            await ctx.author.send(':exclamation: You havn\'t register yet!')
             return
 
         if info[0][3] == 1:
-            await ctx.author.send('You\'ve already login!')
+            await ctx.author.send(':exclamation: You\'ve already login!')
             return
 
         def check(message):
@@ -56,9 +53,9 @@ class Account(Cog_Extension):
 
         if info[0][1] == Acc and info[0][2] == Ps:
             data.execute(f'UPDATE account SET Status=1 WHERE Id={ctx.author.id};')
-            await ctx.author.send('Login Success!')
+            await ctx.author.send(':white_check_mark: Login Success!')
         else:
-            await ctx.author.send('Login Failed.')
+            await ctx.author.send(':x: Login Failed.')
             return
 
         data.connection.commit()
@@ -72,15 +69,15 @@ class Account(Cog_Extension):
         info = data.fetchall()
 
         if len(info) == 0:
-            await ctx.author.send('You havn\'t register yet!')
+            await ctx.author.send(':exclamation: You havn\'t register yet!')
             return
 
         if info[0][3] == 0:
-            await ctx.author.send('You\'ve already logout!')
+            await ctx.author.send(':exclamation: You\'ve already logout!')
             return
 
-        data.execute(f'UPDATE account SET Status=0 WHERE Id={ctx.author.id};')
-        await ctx.author.send('Logout Success!')
+        data.execute(f'UPDATE account SET Status={0} WHERE Id={ctx.author.id};')
+        await ctx.author.send(':white_check_mark: Logout Success!')
 
         data.connection.commit()
 
@@ -93,7 +90,7 @@ class Account(Cog_Extension):
         info = data.fetchall()
 
         if len(info) != 0:
-            await ctx.author.send('You\'ve already registered!')
+            await ctx.author.send(':exclamation: You\'ve already registered!')
             return
 
         def check(message):
@@ -109,7 +106,7 @@ class Account(Cog_Extension):
         PsCfm = (await self.bot.wait_for('message', check=check, timeout=30.0)).content
 
         if RegPs != PsCfm:
-            await ctx.author.send('Two password are not the same, please try again registration.')
+            await ctx.author.send(':exclamation: Two password are not the same, please try again registration.')
             return
 
         # data.execute(f'INSERT INTO account VALUES({ctx.author.id}, {RegName}, {RegPs}, 0);')
@@ -131,7 +128,7 @@ class Account(Cog_Extension):
         print(info)
 
         if len(info) == 0:
-            await ctx.author.send('You havn\'t register yet!')
+            await ctx.author.send(':exclamation: You havn\'t register yet!')
             return
 
         MAcc = str()
@@ -146,7 +143,7 @@ class Account(Cog_Extension):
             await ctx.author.send('Re-set account: ')
             MAcc = (await self.bot.wait_for('message', check=check, timeout=30.0)).content
         elif AccChg != 'no':
-            await ctx.author.send('Invalid syntax!')
+            await ctx.author.send(':exclamation: Invalid syntax!')
             return
 
         await ctx.author.send('Do you want to change password?(yes/no): ')
@@ -159,10 +156,10 @@ class Account(Cog_Extension):
             PsCfm = (await self.bot.wait_for('message', check=check, timeout=30.0)).content
 
             if (MPs != PsCfm):
-                await ctx.author.send('Two password are not the same, please try again account manipulation.')
+                await ctx.author.send(':exclamation: Two password are not the same, please try again account manipulation.')
                 return
         elif PsChg != 'no':
-            await ctx.author.send('Invalid syntax!')
+            await ctx.author.send(':exclamation: Invalid syntax!')
             return
 
         if AccChg == 'yes':
@@ -170,7 +167,7 @@ class Account(Cog_Extension):
         if PsChg == 'yes':
             data.execute(f'UPDATE account SET PWD="{MPs}" WHERE Id={ctx.author.id};')
 
-        await ctx.author.send('Account manipulation success!')
+        await ctx.author.send(':white_check_mark: Account manipulation success!')
 
         data.connection.commit()
 

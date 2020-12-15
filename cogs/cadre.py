@@ -1,8 +1,7 @@
-from core.classes import Cog_Extension
 from discord.ext import commands
-from functions import *
+from core.classes import Cog_Extension
 from core.setup import *
-import discord
+from functions import *
 
 
 class Cadre(Cog_Extension):
@@ -18,14 +17,14 @@ class Cadre(Cog_Extension):
 
         applicant = ctx.author.id
         if cadre_trans(msg) == -1:
-            await ctx.send(f'There are no cadre called {msg}!')
+            await ctx.send(f':exclamation: There are no cadre called {msg}!')
             return
 
         data.execute(f'SELECT * FROM cadre_apply WHERE Id={applicant};')
         info = data.fetchall()
 
         if len(info) != 0:
-            await ctx.send(f'You\'ve already made a application!\n'
+            await ctx.send(f':exclamation: You\'ve already made a application!\n'
                            f'Id: {info[0][0]}, Apply Cadre: {info[0][1]}, Apply Time: {info[0][2]}')
             return
 
@@ -33,16 +32,14 @@ class Cadre(Cog_Extension):
         data.execute(f'INSERT INTO cadre_apply VALUES({applicant}, "{msg}", "{apply_time}");')
         data.connection.commit()
 
-        await ctx.send(f'Application committed!\n'
+        await ctx.send(f':white_check_mark: Application committed!\n'
                        f'Id: {applicant}, Apply Cadre: {msg}, Apply Time: {apply_time}')
 
         await getChannel('_Report').send(f'[Command]Group ca - apply used by member {ctx.author.id}. {now_time_info("whole")}')
 
     @ca.command()
+    @commands.has_any_role('總召', 'Administrator')
     async def list(self, ctx):
-        if not role_check(ctx.author.roles, ['總召', 'Administrator']):
-            await ctx.send('You can\'t use this command!')
-            return
 
         data.execute('SELECT * FROM cadre_apply;')
         info = data.fetchall()
@@ -53,23 +50,21 @@ class Cadre(Cog_Extension):
             applies += f'{member.name}: {apply[1]}, {apply[2]}\n'
 
         if len(applies) == 0:
-            applies = 'There are no application!'
+            applies = ':exclamation: There are no application!'
 
         await ctx.author.send(applies)
 
         await getChannel('_Report').send(f'[Command]Group ca - list used by member {ctx.author.id}. {now_time_info("whole")}')
 
     @ca.command()
+    @commands.has_any_role('總召', 'Administrator')
     async def permit(self, ctx, msg):
-        if not role_check(ctx.author.roles, ['總召', 'Administrator']):
-            await ctx.send('You can\'t use this command!')
-            return
 
         data.execute(f'SELECT Id, Apply_Cadre FROM cadre_apply WHERE Id={int(msg)};')
         info = data.fetchall()
 
         if (len(info) == 0):
-            await ctx.send(f'There are no applicant whose id is {msg}!')
+            await ctx.send(f':exclamation: There are no applicant whose id is {msg}!')
             return
 
         apply_role = cadre_trans(info[0][1])
@@ -78,8 +73,8 @@ class Cadre(Cog_Extension):
         member = await ctx.guild.fetch_member(info[0][0])
         await member.add_roles(cadre_role)
 
-        await ctx.author.send(f'You\'ve permitted user {info[0][0]} to join cadre {info[0][1]}!')
-        await member.send(f'You\'ve been permitted to join cadre {info[0][1]}!')
+        await ctx.author.send(f':white_check_mark: You\'ve permitted user {info[0][0]} to join cadre {info[0][1]}!')
+        await member.send(f':white_check_mark: You\'ve been permitted to join cadre {info[0][1]}!')
 
         data.execute(f'DELETE FROM cadre_apply WHERE Id={info[0][0]};')
         data.connection.commit()
@@ -87,16 +82,14 @@ class Cadre(Cog_Extension):
         await getChannel('_Report').send(f'[Command]Group ca - permit used by member {ctx.author.id}. {now_time_info("whole")}')
 
     @ca.command()
+    @commands.has_any_role('總召', 'Administrator')
     async def search(self, ctx, msg):
-        if not role_check(ctx.author.roles, ['總召', 'Administrator']):
-            await ctx.send('You can\'t use this command!')
-            return
 
         data.execute(f'SELECT * FROM cadre_apply WHERE Id={msg};')
         info = data.fetchall()
 
         if (len(info) == 0):
-            await ctx.send(f'There are no applicant whose Id is {msg}!')
+            await ctx.send(f':exclamation: There are no applicant whose Id is {msg}!')
             return
 
         member = await ctx.guild.fetch_member(info[0][0])
@@ -112,7 +105,7 @@ class Cadre(Cog_Extension):
         # Mode:: 1:副召, 2:美宣, 3:網管, 4:公關, 5:議程, 6:管理
         print(msg.split(' '))
         if (len(msg.split(' ')) != 2):
-            await ctx.send('There are no target selected!')
+            await ctx.send(':exclamation: There are no target selected!')
             return
 
         mode = int(msg.split(' ')[0])
@@ -122,7 +115,7 @@ class Cadre(Cog_Extension):
         print(msg_split)
 
         if (int(len(msg_split)) % 2 != 0):
-            await ctx.send('School -> Name map error!')
+            await ctx.send(':exclamation: School -> Name map error!')
             return
 
         school = []
@@ -150,9 +143,9 @@ class Cadre(Cog_Extension):
                         if (len(member.roles) == 2):
                             await member.remove_roles(old_role)
                         await member.add_roles(new_role)
-                        await ctx.channel.send(f'{member.name}\'s role was updated to {new_role}!')
+                        await ctx.channel.send(f':white_check_mark: {member.name}\'s role was updated to {new_role}!')
 
-        await ctx.send('Role update complete!')
+        await ctx.send(':white_check_mark: Role update complete!')
 
         await getChannel('_Report').send(f'[Command]role_update used by member {ctx.author.id}. {now_time_info("whole")}')
 

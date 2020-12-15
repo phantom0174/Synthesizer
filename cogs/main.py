@@ -1,16 +1,16 @@
-from core.classes import Cog_Extension
-from core.setup import *
 from discord.ext import commands
+from core.classes import Cog_Extension
 
 
 class Main(Cog_Extension):
     # ping
     @commands.command()
     async def ping(self, ctx):
-        await ctx.send(f'{round(self.bot.latency * 1000)} (ms)')
+        await ctx.send(f':stopwatch: {round(self.bot.latency * 1000)} (ms)')
 
     # check member
     @commands.command()
+    @commands.has_any_role('總召', 'Administrator')
     async def m_c(self, ctx):
         for member in ctx.guild.members:
             print(member)
