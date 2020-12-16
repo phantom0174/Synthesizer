@@ -53,7 +53,7 @@ async def reload(ctx, msg):
 @bot.command()
 @commands.has_any_role('總召')
 async def safe_stop(ctx):
-    print(':white_check_mark: The bot has stopped!')
+    await ctx.send(':white_check_mark: The bot has stopped!')
     data.connection.commit()
     data.connection.close()
     sys.exit(0)
