@@ -1,5 +1,4 @@
 # import keep_alive
-from core.task import *
 from discord.ext import commands
 from core.setup import *
 from functions import *
@@ -14,7 +13,6 @@ bot = commands.Bot(command_prefix='sc!', intents=intents)
 async def on_ready():
     print("------>> Bot is online <<------")
     await setChannel(bot)
-    await Auto_task(bot)
 
 
 @bot.command()
