@@ -1,18 +1,19 @@
-# import keep_alive
+from core.setup import jdata, client
 from discord.ext import commands
-from core.setup import *
-from core.functions import *
+import core.functions as func
 import discord
 import sys
 import os
 
+# import keep_alive
+
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='sc!', intents=intents)
+
 
 @bot.event
 async def on_ready():
     print("------>> Bot is online <<------")
-    await setChannel(bot)
 
 
 @bot.command()
@@ -54,15 +55,12 @@ async def reload(ctx, msg):
 @commands.has_any_role('總召')
 async def safe_stop(ctx):
     await ctx.send(':white_check_mark: The bot has stopped!')
-    data.connection.commit()
-    data.connection.close()
     sys.exit(0)
 
 
 @bot.event
 async def on_disconnect():
-    print('Bot disconnected')
-    data.connection.commit()
+    await func.getChannel(bot, "_Report").send(f'[Alert]Bot disconnected. {func.now_time_info("whole")}')
 
 
 for filename in os.listdir('./cogs'):
@@ -72,4 +70,5 @@ for filename in os.listdir('./cogs'):
 
 # keep_alive.keep_alive()
 
-bot.run(os.environ.get("TOKEN"))
+if __name__ == '__main__':
+    bot.run(os.environ.get("TOKEN"))

@@ -1,6 +1,6 @@
-from discord.ext import commands
 from core.classes import Cog_Extension
 from core.setup import jdata, client
+from discord.ext import commands
 import core.functions as func
 
 
@@ -28,7 +28,7 @@ class Account(Cog_Extension):
 
         print(account_list)
 
-        await func.getChannel('_Report').send(f'[Command]Group acc - list used by member {ctx.author.id}. {func.now_time_info("whole")}')
+        await func.getChannel(self.bot, '_Report').send(f'[Command]Group acc - list used by member {ctx.author.id}. {func.now_time_info("whole")}')
 
     # login
     @acc.command()
@@ -61,7 +61,7 @@ class Account(Cog_Extension):
             await ctx.author.send(':x: Login Failed.')
             return
 
-        await func.getChannel('_Report').send(f'[Command]Group acc - login used by member {ctx.author.id}. {func.now_time_info("whole")}')
+        await func.getChannel(self.bot, '_Report').send(f'[Command]Group acc - login used by member {ctx.author.id}. {func.now_time_info("whole")}')
 
     # logout
     @acc.command()
@@ -81,7 +81,7 @@ class Account(Cog_Extension):
         account_cursor.update_one({"_id": ctx.author.id}, {"$set": {"status": 0}})
         await ctx.author.send(':white_check_mark: Logout Success!')
 
-        await func.getChannel('_Report').send(f'[Command]Group acc - logout used by member {ctx.author.id}. {func.now_time_info("whole")}')
+        await func.getChannel(self.bot, '_Report').send(f'[Command]Group acc - logout used by member {ctx.author.id}. {func.now_time_info("whole")}')
 
     # register
     @acc.command()
@@ -115,7 +115,7 @@ class Account(Cog_Extension):
 
         await ctx.author.send('Register Success!')
 
-        await func.getChannel('_Report').send(f'[Command]Group acc - register used by member {ctx.author.id}. {func.now_time_info("whole")}')
+        await func.getChannel(self.bot, '_Report').send(f'[Command]Group acc - register used by member {ctx.author.id}. {func.now_time_info("whole")}')
 
     # manipulation
     @acc.command()
@@ -166,7 +166,7 @@ class Account(Cog_Extension):
 
         await ctx.author.send(':white_check_mark: Account manipulation success!')
 
-        await func.getChannel('_Report').send(f'[Command]Group acc - mani used by member {ctx.author.id}. {func.now_time_info("whole")}')
+        await func.getChannel(self.bot, '_Report').send(f'[Command]Group acc - mani used by member {ctx.author.id}. {func.now_time_info("whole")}')
 
 
 def setup(bot):

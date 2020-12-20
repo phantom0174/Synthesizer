@@ -1,7 +1,7 @@
+from core.classes import Cog_Extension
 from core.setup import jdata, client
 import core.functions as func
 from discord.ext import tasks
-from core.classes import Cog_Extension
 
 
 class Task(Cog_Extension):
