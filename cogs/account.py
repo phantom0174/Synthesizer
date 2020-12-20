@@ -1,44 +1,47 @@
 from discord.ext import commands
 from core.classes import Cog_Extension
-from core.setup import *
-from functions import *
+from core.setup import jdata, client
+import core.functions as func
 
 
 class Account(Cog_Extension):
-    # account main group
+
     @commands.group()
     async def acc(self, ctx):
         pass
 
-    # check account_list
+    # check account list
     @acc.command()
     @commands.has_any_role('總召', 'Administrator')
     async def list(self, ctx):
 
-        data.execute('SELECT * FROM account')
-        Accs = data.fetchall()
+        account_cursor = client["account"]
+        accounts = account_cursor.find({})
 
-        print(Accs)
+        account_list = str()
 
-        account_info = str()
-        for acc in Accs:
-            account_info += f'{acc[1]}({acc[0]})<{acc[2]}>: {acc[3]}\n'
+        if accounts is not None:
+            for item in accounts:
+                account_list += f'Id: {item["_id"]}, Name: {item["name"]}, Password: {item["pw"]}, Status: {item["status"]}\n'
+        else:
+            account_list = 'None'
 
-        print(account_info)
+        print(account_list)
 
-        await getChannel('_Report').send(f'[Command]Group acc - list used by member {ctx.author.id}. {now_time_info("whole")}')
+        await func.getChannel('_Report').send(f'[Command]Group acc - list used by member {ctx.author.id}. {func.now_time_info("whole")}')
 
-    # account login
+    # login
     @acc.command()
     async def login(self, ctx):
-        data.execute(f'SELECT * FROM account WHERE Id={ctx.author.id}')
-        info = data.fetchall()
 
-        if len(info) == 0:
+        account_cursor = client["account"]
+        data = account_cursor.find_one({"_id": ctx.author.id})
+
+        if data is None:
             await ctx.author.send(':exclamation: You havn\'t register yet!')
             return
 
-        if info[0][3] == 1:
+        if data["status"] == 1:
             await ctx.author.send(':exclamation: You\'ve already login!')
             return
 
@@ -46,50 +49,48 @@ class Account(Cog_Extension):
             return message.channel == ctx.author.dm_channel and message.author == ctx.author
 
         await ctx.author.send('Enter account: ')
-        Acc = (await self.bot.wait_for('message', check=check, timeout=30.0)).content
+        enter_acc = (await self.bot.wait_for('message', check=check, timeout=30.0)).content
 
         await ctx.author.send('Enter password: ')
-        Ps = (await self.bot.wait_for('message', check=check, timeout=30.0)).content
+        enter_pw = (await self.bot.wait_for('message', check=check, timeout=30.0)).content
 
-        if info[0][1] == Acc and info[0][2] == Ps:
-            data.execute(f'UPDATE account SET Status=1 WHERE Id={ctx.author.id};')
+        if data['name'] == enter_acc and data['pw'] == enter_pw:
+            account_cursor.update_one({"_id": ctx.author.id}, {"$set": {"status": 1}})
             await ctx.author.send(':white_check_mark: Login Success!')
         else:
             await ctx.author.send(':x: Login Failed.')
             return
 
-        data.connection.commit()
+        await func.getChannel('_Report').send(f'[Command]Group acc - login used by member {ctx.author.id}. {func.now_time_info("whole")}')
 
-        await getChannel('_Report').send(f'[Command]Group acc - login used by member {ctx.author.id}. {now_time_info("whole")}')
-
-    # account logout
+    # logout
     @acc.command()
     async def logout(self, ctx):
-        data.execute(f'SELECT * FROM account WHERE Id={ctx.author.id}')
-        info = data.fetchall()
 
-        if len(info) == 0:
+        account_cursor = client["account"]
+        data = account_cursor.find_one({"_id": ctx.author.id})
+
+        if data is None:
             await ctx.author.send(':exclamation: You havn\'t register yet!')
             return
 
-        if info[0][3] == 0:
+        if data["status"] == 0:
             await ctx.author.send(':exclamation: You\'ve already logout!')
             return
 
-        data.execute(f'UPDATE account SET Status={0} WHERE Id={ctx.author.id};')
+        account_cursor.update_one({"_id": ctx.author.id}, {"$set": {"status": 0}})
         await ctx.author.send(':white_check_mark: Logout Success!')
 
-        data.connection.commit()
+        await func.getChannel('_Report').send(f'[Command]Group acc - logout used by member {ctx.author.id}. {func.now_time_info("whole")}')
 
-        await getChannel('_Report').send(f'[Command]Group acc - logout used by member {ctx.author.id}. {now_time_info("whole")}')
-
-    # register account
+    # register
     @acc.command()
     async def register(self, ctx):
-        data.execute(f'SELECT * FROM account WHERE Id={ctx.author.id}')
-        info = data.fetchall()
 
-        if len(info) != 0:
+        account_cursor = client["account"]
+        data = account_cursor.find_one({"_id": ctx.author.id})
+
+        if data is not None:
             await ctx.author.send(':exclamation: You\'ve already registered!')
             return
 
@@ -97,81 +98,75 @@ class Account(Cog_Extension):
             return message.channel == ctx.author.dm_channel and message.author == ctx.author
 
         await ctx.author.send('Set account: ')
-        RegName = (await self.bot.wait_for('message', check=check, timeout=30.0)).content
+        register_name = (await self.bot.wait_for('message', check=check, timeout=30.0)).content
 
         await ctx.author.send('Set password: ')
-        RegPs = (await self.bot.wait_for('message', check=check, timeout=30.0)).content
+        register_pw = (await self.bot.wait_for('message', check=check, timeout=30.0)).content
 
         await ctx.author.send('Password confirming: ')
-        PsCfm = (await self.bot.wait_for('message', check=check, timeout=30.0)).content
+        confirm_pw = (await self.bot.wait_for('message', check=check, timeout=30.0)).content
 
-        if RegPs != PsCfm:
+        if register_pw != confirm_pw:
             await ctx.author.send(':exclamation: Two password are not the same, please try again registration.')
             return
 
-        # data.execute(f'INSERT INTO account VALUES({ctx.author.id}, {RegName}, {RegPs}, 0);')
-        data.execute(
-            f'INSERT INTO account (id, Name, PWD, Status) VALUES ("{ctx.author.id}", "{RegName}", "{RegPs}", 0);')
+        member_account_info = {"_id": ctx.author.id, "name": register_name, "pw": register_pw, "status": 0}
+        account_cursor.insert_one(member_account_info)
 
         await ctx.author.send('Register Success!')
 
-        data.connection.commit()
+        await func.getChannel('_Report').send(f'[Command]Group acc - register used by member {ctx.author.id}. {func.now_time_info("whole")}')
 
-        await getChannel('_Report').send(f'[Command]Group acc - register used by member {ctx.author.id}. {now_time_info("whole")}')
-
-    # account manipulation
+    # manipulation
     @acc.command()
     async def mani(self, ctx):
-        data.execute(f'SELECT * FROM account WHERE Id="{ctx.author.id}"')
-        info = data.fetchall()
 
-        print(info)
+        account_cursor = client["account"]
+        data = account_cursor.find_one({"_id": ctx.author.id})
 
-        if len(info) == 0:
+        if data is None:
             await ctx.author.send(':exclamation: You havn\'t register yet!')
             return
 
-        MAcc = str()
-        MPs = str()
+        mani_acc = str()
+        mani_pw = str()
 
         def check(message):
             return message.channel == ctx.author.dm_channel and message.author == ctx.author
 
         await ctx.author.send('Do you want to change account?(yes/no): ')
-        AccChg = (await self.bot.wait_for('message', check=check, timeout=30.0)).content.lower()
-        if AccChg == 'yes':
+        change_acc = (await self.bot.wait_for('message', check=check, timeout=30.0)).content.lower()
+        if change_acc == 'yes':
             await ctx.author.send('Re-set account: ')
-            MAcc = (await self.bot.wait_for('message', check=check, timeout=30.0)).content
-        elif AccChg != 'no':
+            mani_acc = (await self.bot.wait_for('message', check=check, timeout=30.0)).content
+        elif change_acc != 'no':
             await ctx.author.send(':exclamation: Invalid syntax!')
             return
 
         await ctx.author.send('Do you want to change password?(yes/no): ')
-        PsChg = (await self.bot.wait_for('message', check=check, timeout=30.0)).content.lower()
-        if PsChg == 'yes':
+        change_pw = (await self.bot.wait_for('message', check=check, timeout=30.0)).content.lower()
+        if change_pw == 'yes':
             await ctx.author.send('Re-set password: ')
-            MPs = (await self.bot.wait_for('message', check=check, timeout=30.0)).content
+            mani_pw = (await self.bot.wait_for('message', check=check, timeout=30.0)).content
 
             await ctx.author.send('Password confirming: ')
-            PsCfm = (await self.bot.wait_for('message', check=check, timeout=30.0)).content
+            confirm_pw = (await self.bot.wait_for('message', check=check, timeout=30.0)).content
 
-            if (MPs != PsCfm):
+            if mani_pw != confirm_pw:
                 await ctx.author.send(':exclamation: Two password are not the same, please try again account manipulation.')
                 return
-        elif PsChg != 'no':
+        elif change_pw != 'no':
             await ctx.author.send(':exclamation: Invalid syntax!')
             return
 
-        if AccChg == 'yes':
-            data.execute(f'UPDATE account SET Name="{MAcc}" WHERE Id={ctx.author.id};')
-        if PsChg == 'yes':
-            data.execute(f'UPDATE account SET PWD="{MPs}" WHERE Id={ctx.author.id};')
+        if change_acc == 'yes':
+            account_cursor.update_one({"_id": ctx.author.id}, {"$set": {"name": mani_acc}})
+        if change_pw == 'yes':
+            account_cursor.update_one({"_id": ctx.author.id}, {"$set": {"name": mani_pw}})
 
         await ctx.author.send(':white_check_mark: Account manipulation success!')
 
-        data.connection.commit()
-
-        await getChannel('_Report').send(f'[Command]Group acc - mani used by member {ctx.author.id}. {now_time_info("whole")}')
+        await func.getChannel('_Report').send(f'[Command]Group acc - mani used by member {ctx.author.id}. {func.now_time_info("whole")}')
 
 
 def setup(bot):

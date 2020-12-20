@@ -7,3 +7,16 @@ Cadre index:
 美宣: 5
 管理: 6
 一般: 7
+
+
+# database collections
+cadre_apply:
+Id INTEGER
+Apply_Cadre TEXT
+Apply_Time TEXT
+
+account:
+Id INTEGER
+Name TEXT
+PWD TEXT
+Status INTEGER

@@ -1,6 +1,5 @@
 from datetime import datetime, timezone, timedelta
 import discord
-global _ToSQCS
 global _ToMV
 global _Report
 

@@ -1,8 +1,8 @@
 import sqlitebck
 from core.setup import *
-from functions import *
+from core.functions import *
 import asyncio
-from discord.ext import commands, tasks
+from discord.ext import tasks
 from core.classes import Cog_Extension
 
 

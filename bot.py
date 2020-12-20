@@ -1,7 +1,7 @@
 # import keep_alive
 from discord.ext import commands
 from core.setup import *
-from functions import *
+from core.functions import *
 import discord
 import sys
 import os

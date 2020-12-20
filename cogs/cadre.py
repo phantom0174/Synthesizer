@@ -1,7 +1,7 @@
 from discord.ext import commands
 from core.classes import Cog_Extension
 from core.setup import *
-from functions import *
+from core.functions import *
 
 
 class Cadre(Cog_Extension):
