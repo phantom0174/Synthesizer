@@ -10,7 +10,7 @@ Cadre index:
 
 
 # database collections
-cadre_apply:
+cadre apply:
 Id INTEGER
 Apply_Cadre TEXT
 Apply_Time TEXT

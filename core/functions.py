@@ -1,7 +1,5 @@
 from datetime import datetime, timezone, timedelta
 import discord
-global _ToMV
-global _Report
 
 
 def now_time_info(mode):
@@ -14,22 +12,6 @@ def now_time_info(mode):
         return int(dt2.strftime("%H"))
     elif mode == 'date':
         return int(dt2.isoweekday())
-
-
-def list_check(main_list, target_list):
-    for main in main_list:
-        if (main in target_list):
-            return True
-
-    return False
-
-
-def role_check(main_list, target_list):
-    for main in main_list:
-        if (main.name in target_list):
-            return True
-
-    return False
 
 
 def cadre_trans(cadre):
@@ -71,24 +53,6 @@ def cadre_trans(cadre):
     return -1
 
 
-async def setChannel(bot):
-    global _ToSQCS
-    global _ToMV
-    global _Report
-
-    _ToSQCS = discord.utils.get(bot.guilds[1].text_channels, name='sqcs-and-syn')
-    _ToMV = discord.utils.get(bot.guilds[1].text_channels, name='syn-and-mv')
-    _Report = discord.utils.get(bot.guilds[1].text_channels, name='syn-report')
-
-
-def getChannel(target):
-    global _ToSQCS
-    global _ToMV
-    global _Report
-
-    if target == '_ToSQCS':
-        return _ToSQCS
-    elif target == '_ToMV':
-        return _ToMV
-    elif target == '_Report':
-        return _Report
+def getChannel(bot, target):
+    if target == '_Report':
+        return discord.utils.get(bot.guilds[1].text_channels, name='syn-report')

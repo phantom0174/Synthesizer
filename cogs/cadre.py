@@ -1,7 +1,7 @@
 from discord.ext import commands
 from core.classes import Cog_Extension
-from core.setup import *
-from core.functions import *
+from core.setup import jdata, client
+import core.functions as func
 
 
 class Cadre(Cog_Extension):
@@ -11,143 +11,130 @@ class Cadre(Cog_Extension):
         pass
 
     @ca.command()
-    async def apply(self, ctx, msg):
+    async def apply(self, ctx, cadre):
         if ctx.channel.id != 774794670034124850:
             return
 
         applicant = ctx.author.id
-        if cadre_trans(msg) == -1:
-            await ctx.send(f':exclamation: There are no cadre called {msg}!')
+        if func.cadre_trans(cadre) == -1:
+            await ctx.send(f':exclamation: There are no cadre called {cadre}!')
             return
 
-        data.execute(f'SELECT * FROM cadre_apply WHERE Id={applicant};')
-        info = data.fetchall()
+        cadre_cursor = client["cadre"]
+        data = cadre_cursor.find_one({"_id": applicant})
 
-        if len(info) != 0:
-            await ctx.send(f':exclamation: You\'ve already made a application!\n'
-                           f'Id: {info[0][0]}, Apply Cadre: {info[0][1]}, Apply Time: {info[0][2]}')
+        if data is not None:
+            await ctx.author.send(f':exclamation: You\'ve already made a application!\n'
+                                  f'Id: {data["_id"]}, Apply Cadre: {data["apply_cadre"]}, Apply Time: {data["apply_time"]}')
             return
 
-        apply_time = now_time_info("whole")
-        data.execute(f'INSERT INTO cadre_apply VALUES({applicant}, "{msg}", "{apply_time}");')
-        data.connection.commit()
+        apply_time = func.now_time_info('whole')
+        apply_info = {"_id": applicant, "apply_cadre": cadre, "apply_time": apply_time}
+        cadre_cursor.insert_one(apply_info)
 
         await ctx.send(f':white_check_mark: Application committed!\n'
-                       f'Id: {applicant}, Apply Cadre: {msg}, Apply Time: {apply_time}')
+                       f'Id: {applicant}, Apply Cadre: {cadre}, Apply Time: {apply_time}')
 
-        await getChannel('_Report').send(f'[Command]Group ca - apply used by member {ctx.author.id}. {now_time_info("whole")}')
+        await func.getChannel(self.bot, '_Report').send(
+            f'[Command]Group ca - apply used by member {applicant}. {func.now_time_info("whole")}')
 
     @ca.command()
     @commands.has_any_role('總召', 'Administrator')
     async def list(self, ctx):
 
-        data.execute('SELECT * FROM cadre_apply;')
-        info = data.fetchall()
+        cadre_cursor = client["cadre"]
+        data = cadre_cursor.find({})
 
-        applies = str()
-        for apply in info:
-            member = await self.bot.fetch_user(apply[0])
-            applies += f'{member.name}: {apply[1]}, {apply[2]}\n'
+        apply_info = str()
+        for item in data:
+            member_name = await self.bot.guilds[0].fetch_member(item["_id"])
+            if member_name is None:
+                member_name = await self.bot.fetch_user(item["_id"])
 
-        if len(applies) == 0:
-            applies = ':exclamation: There are no application!'
+            apply_info += f'{member_name}: {item["apply_cadre"]}, {item["apply_time"]}\n'
 
-        await ctx.author.send(applies)
+        if len(apply_info) == 0:
+            apply_info = ':exclamation: There are no application!'
 
-        await getChannel('_Report').send(f'[Command]Group ca - list used by member {ctx.author.id}. {now_time_info("whole")}')
+        await ctx.author.send(apply_info)
+
+        await func.getChannel(self.bot, '_Report').send(
+            f'[Command]Group ca - list used by member {ctx.author.id}. {func.now_time_info("whole")}')
 
     @ca.command()
     @commands.has_any_role('總召', 'Administrator')
-    async def permit(self, ctx, msg):
+    async def permit(self, ctx, permit_id: int):
 
-        data.execute(f'SELECT Id, Apply_Cadre FROM cadre_apply WHERE Id={int(msg)};')
-        info = data.fetchall()
+        cadre_cursor = client["cadre"]
+        data = cadre_cursor.find_one({"_id": permit_id})
 
-        if (len(info) == 0):
-            await ctx.send(f':exclamation: There are no applicant whose id is {msg}!')
+        if data is None:
+            await ctx.send(f':exclamation: There are no applicant whose id is {permit_id}!')
             return
 
-        apply_role = cadre_trans(info[0][1])
-        cadre_role = ctx.guild.get_role(db['cadre_id'][apply_role])
+        apply_role = func.cadre_trans(data["apply_cadre"])
+        cadre_role = ctx.guild.get_role(jdata['cadre_id'][apply_role])
 
-        member = await ctx.guild.fetch_member(info[0][0])
+        member = await ctx.guild.fetch_member(data["_id"])
         await member.add_roles(cadre_role)
 
-        await ctx.author.send(f':white_check_mark: You\'ve permitted user {info[0][0]} to join cadre {info[0][1]}!')
-        await member.send(f':white_check_mark: You\'ve been permitted to join cadre {info[0][1]}!')
+        await ctx.author.send(
+            f':white_check_mark: You\'ve permitted user {member.name} to join cadre {data["apply_cadre"]}!')
+        await member.send(f':white_check_mark: You\'ve been permitted to join cadre {data["apply_cadre"]}!')
 
-        data.execute(f'DELETE FROM cadre_apply WHERE Id={info[0][0]};')
-        data.connection.commit()
+        cadre_cursor.delete_one({"_id": data["_id"]})
 
-        await getChannel('_Report').send(f'[Command]Group ca - permit used by member {ctx.author.id}. {now_time_info("whole")}')
+        await func.getChannel(self.bot, '_Report').send(
+            f'[Command]Group ca - permit used by member {ctx.author.id}. {func.now_time_info("whole")}')
 
     @ca.command()
     @commands.has_any_role('總召', 'Administrator')
-    async def search(self, ctx, msg):
+    async def search(self, ctx, search_id: int):
 
-        data.execute(f'SELECT * FROM cadre_apply WHERE Id={msg};')
-        info = data.fetchall()
+        cadre_cursor = client["cadre"]
+        data = cadre_cursor.find_one({"_id": search_id})
 
-        if (len(info) == 0):
-            await ctx.send(f':exclamation: There are no applicant whose Id is {msg}!')
+        if data is None:
+            await ctx.send(f':exclamation: There are no applicant whose Id is {search_id}!')
             return
 
-        member = await ctx.guild.fetch_member(info[0][0])
-        await ctx.send(f'{member.name}: {info[0][1]}, {info[0][2]}')
+        member = await ctx.guild.fetch_member(data["_id"])
+        await ctx.send(f'{member.name}: {data["apply_cadre"]}, {data["apply_time"]}')
 
-        await getChannel('_Report').send(f'[Command]Group ca - search used by member {ctx.author.id}. {now_time_info("whole")}')
-
-    # ===== group - cadre application =====<<
+        await func.getChannel(self.bot, '_Report').send(
+            f'[Command]Group ca - search used by member {ctx.author.id}. {func.now_time_info("whole")}')
 
     # department role update
     @commands.command()
     async def role_update(self, ctx, *, msg):
-        # Mode:: 1:副召, 2:美宣, 3:網管, 4:公關, 5:議程, 6:管理
-        print(msg.split(' '))
-        if (len(msg.split(' ')) != 2):
-            await ctx.send(':exclamation: There are no target selected!')
+        update_cadre = msg.split(' ')[0]
+
+        school_name_list = msg.split(' ')[1].split('\n')
+
+        if len(school_name_list) % 2 != 0:
+            await ctx.send(':exclamation: School -> Name map quantity error!')
             return
 
-        mode = int(msg.split(' ')[0])
-        print(mode)
+        apply_role = func.cadre_trans(update_cadre)
+        new_role = ctx.guild.get_role(jdata['cadre_id'][apply_role])
 
-        msg_split = msg.split(' ')[1].split('\n')
-        print(msg_split)
+        school = school_name_list[0:len(school_name_list)/2 - 1]
+        name = school_name_list[len(school_name_list)/2::]
 
-        if (int(len(msg_split)) % 2 != 0):
-            await ctx.send(':exclamation: School -> Name map error!')
-            return
-
-        school = []
-        name = []
-
-        new_role = ctx.guild.get_role(int(db['department_id'][mode]))
-        await ctx.send(new_role)
-
-        for i in range(int(len(msg_split))):
-            if (i + 1 <= int(len(msg_split) / 2)):
-                school.append(msg_split[i])
-            else:
-                name.append(msg_split[i])
-
-        for i in range(int(len(msg_split) / 2)):
+        for (member_school, member_name) in zip(school, name):
             for member in ctx.guild.members:
-                member_tag = member.name.split(' ')
-                print(member_tag)
+                if member.nick is None:
+                    continue
 
-                if (len(member_tag) >= 3):
-                    member_school = member_tag[0]
-                    member_name = member_tag[1]
-                    if (member_school.find(school[i]) != -1 and member_name == name[i]):
-                        old_role = member.top_role
-                        if (len(member.roles) == 2):
-                            await member.remove_roles(old_role)
-                        await member.add_roles(new_role)
-                        await ctx.channel.send(f':white_check_mark: {member.name}\'s role was updated to {new_role}!')
+                if member_school in member.nick.split(' '):
+                    if member_name in member.nick.split(' '):
+                        await member.add_role(new_role)
+                        await ctx.channel.send(f':white_check_mark: {member.nick}\'s role was updated to {new_role}!')
 
         await ctx.send(':white_check_mark: Role update complete!')
 
-        await getChannel('_Report').send(f'[Command]role_update used by member {ctx.author.id}. {now_time_info("whole")}')
+        await func.getChannel(self.bot, '_Report').send(
+            f'[Command]role_update used by member {ctx.author.id}. {func.now_time_info("whole")}')
 
 
 def setup(bot):
