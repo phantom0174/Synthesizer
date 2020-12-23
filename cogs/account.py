@@ -1,7 +1,9 @@
 from core.classes import Cog_Extension
-from core.setup import jdata, client
+from core.setup import jdata, client, link
 from discord.ext import commands
 import core.functions as func
+from pymongo import MongoClient
+import core.rank_module as rm
 
 
 class Account(Cog_Extension):
@@ -56,6 +58,12 @@ class Account(Cog_Extension):
 
         if data['name'] == enter_acc and data['pw'] == enter_pw:
             account_cursor.update_one({"_id": ctx.author.id}, {"$set": {"status": 1}})
+
+            # add player role
+            player_role = ctx.guild.get_role(jdata['player_role'])
+            member = await ctx.guild.fetch_member(ctx.author.id)
+            await member.add_role(player_role)
+
             await ctx.author.send(':white_check_mark: Login Success!')
         else:
             await ctx.author.send(':x: Login Failed.')
@@ -68,6 +76,7 @@ class Account(Cog_Extension):
     async def logout(self, ctx):
 
         account_cursor = client["account"]
+        player_info_cursor = client["player-info"]
         data = account_cursor.find_one({"_id": ctx.author.id})
 
         if data is None:
@@ -79,6 +88,12 @@ class Account(Cog_Extension):
             return
 
         account_cursor.update_one({"_id": ctx.author.id}, {"$set": {"status": 0}})
+
+        # remove player role
+        player_role = ctx.guild.get_role(jdata['player_role'])
+        member = await ctx.guild.fetch_member(ctx.author.id)
+        await member.remove_role(player_role)
+
         await ctx.author.send(':white_check_mark: Logout Success!')
 
         await func.getChannel(self.bot, '_Report').send(f'[Command]Group acc - logout used by member {ctx.author.id}. {func.now_time_info("whole")}')
@@ -113,7 +128,20 @@ class Account(Cog_Extension):
         member_account_info = {"_id": ctx.author.id, "name": register_name, "pw": register_pw, "status": 0}
         account_cursor.insert_one(member_account_info)
 
-        await ctx.author.send('Register Success!')
+        # setting fluctlight cursor
+        fluctlight_client = MongoClient(link)["LightCube"]
+        fluctlight_cursor = fluctlight_client["light-cube-info"]
+
+        # getting default rank of member
+        score = fluctlight_cursor.find_one({"_id": ctx.author.id}, {"score": 1})["score"]
+        default_rank = rm.get_rank(self.bot, score, '1')
+
+        # adding player info to collection
+        member_info = {"_id": ctx.author.id, "name": register_name, "rank": default_rank, "rank_mode": 1, "location": 10, "objects": "none", "effects": "none"}
+        player_info_cursor = client["player-info"]
+        player_info_cursor.insert_one(member_info)
+
+        await ctx.author.send(':white_check_mark: Register Success!')
 
         await func.getChannel(self.bot, '_Report').send(f'[Command]Group acc - register used by member {ctx.author.id}. {func.now_time_info("whole")}')
 
