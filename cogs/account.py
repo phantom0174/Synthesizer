@@ -62,7 +62,7 @@ class Account(Cog_Extension):
             # add player role
             player_role = ctx.guild.get_role(jdata['player_role'])
             member = await ctx.guild.fetch_member(ctx.author.id)
-            await member.add_role(player_role)
+            await member.add_roles(player_role)
 
             await ctx.author.send(':white_check_mark: Login Success!')
         else:
@@ -92,7 +92,7 @@ class Account(Cog_Extension):
         # remove player role
         player_role = ctx.guild.get_role(jdata['player_role'])
         member = await ctx.guild.fetch_member(ctx.author.id)
-        await member.remove_role(player_role)
+        await member.remove_roles(player_role)
 
         await ctx.author.send(':white_check_mark: Logout Success!')
 
@@ -134,7 +134,7 @@ class Account(Cog_Extension):
 
         # getting default rank of member
         score = fluctlight_cursor.find_one({"_id": ctx.author.id}, {"score": 1})["score"]
-        default_rank = rm.get_rank(self.bot, score, '1')
+        default_rank = await rm.get_rank(self.bot, score, '1')
 
         # adding player info to collection
         member_info = {"_id": ctx.author.id, "name": register_name, "rank": default_rank, "rank_mode": 1, "location": 10, "objects": "none", "effects": "none"}

@@ -6,15 +6,11 @@ import discord
 
 
 async def get_rank(bot, score, new_mode):
-    member_count = bot.guilds[0].member_count
-    rank_gap = 5 * pow(member_count, 1 / 3)
-
-    rank_index = int(score / rank_gap)
+    rank_index = str(int(score / 50))
 
     mvisualizer_client = MongoClient(link)["mvisualizer"]
     rank_cursor = mvisualizer_client["rank_index"]
 
-    data = rank_cursor.find({"_id": new_mode + rank_index})
-    new_rank = data["name"]
+    new_rank = rank_cursor.find_one({"_id": new_mode + rank_index})["name"]
 
     return new_rank
