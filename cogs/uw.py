@@ -49,6 +49,5 @@ class UW(Cog_Extension):
             await ctx.send(f'There\'s no connection between location {location1_name} and location {location2_name}!')
 
 
-
 def setup(bot):
     bot.add_cog(UW(bot))
