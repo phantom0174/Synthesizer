@@ -7,7 +7,7 @@ import core.functions as func
 class UW(Cog_Extension):
 
     @commands.group()
-    async def loc(self):
+    async def loc(self, ctx):
         pass
 
     @loc.command()
