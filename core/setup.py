@@ -11,3 +11,5 @@ client = MongoClient(link).synthesizer
 
 with open('setting.json', mode='r', encoding='utf8') as jfile:
     jdata = json.load(jfile)
+
+Score_Board = list(list())

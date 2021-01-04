@@ -20,7 +20,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c035de0c-f75c-43e0-93a7-043046e0d077" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/keep_alive.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/main.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/main.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cogs/task.py" beforeDir="false" afterPath="$PROJECT_DIR$/cogs/task.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/setup.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,6 +37,14 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
   </component>
   <component name="GithubPullRequestsUISettings">
     <option name="hiddenUrls">
@@ -52,12 +68,13 @@
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="D:\Coding\Github\Synthesizer" />
-      <recent name="D:\Coding\Github\Synthesizer\core" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\Coding\Github\Synthesizer" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Coding\Github\Synthesizer\static" />
+      <recent name="D:\Coding\Github\Synthesizer" />
+      <recent name="D:\Coding\Github\Synthesizer\core" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -72,6 +89,7 @@
     <servers />
   </component>
   <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.js" />
     <option featureType="com.intellij.fileTypeFactory" implementationName="*.txt" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -88,27 +106,5 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="373" y="174" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1608122720503">
-      <screen x="0" y="31" width="1280" height="689" />
-    </state>
-    <state x="373" y="174" key="#com.intellij.fileTypes.FileTypeChooser/0.31.1280.689@0.31.1280.689" timestamp="1608122720503" />
-    <state x="321" y="109" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog" timestamp="1606489210335">
-      <screen x="0" y="31" width="1280" height="689" />
-    </state>
-    <state x="321" y="109" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.31.1280.689@0.31.1280.689" timestamp="1606489210335" />
-    <state x="371" y="121" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1608123135655">
-      <screen x="0" y="31" width="1280" height="689" />
-    </state>
-    <state x="371" y="121" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.31.1280.689@0.31.1280.689" timestamp="1608123135655" />
-    <state x="421" y="130" key="FileChooserDialogImpl" timestamp="1607412430103">
-      <screen x="0" y="31" width="1280" height="689" />
-    </state>
-    <state x="421" y="130" key="FileChooserDialogImpl/0.31.1280.689@0.31.1280.689" timestamp="1607412430103" />
-    <state x="135" y="30" key="SettingsEditor" timestamp="1606479362230">
-      <screen x="0" y="31" width="1280" height="689" />
-    </state>
-    <state x="135" y="30" key="SettingsEditor/0.31.1280.689@0.31.1280.689" timestamp="1606479362230" />
   </component>
 </project>
