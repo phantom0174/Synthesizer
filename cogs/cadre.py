@@ -51,7 +51,7 @@ class Cadre(Cog_Extension):
             if member_name is None:
                 member_name = await self.bot.fetch_user(item["_id"])
 
-            apply_info += f'{member_name}: {item["apply_cadre"]}, {item["apply_time"]}\n'
+            apply_info += f'{member_name}({item["_id"]}): {item["apply_cadre"]}, {item["apply_time"]}\n'
 
         if len(apply_info) == 0:
             apply_info = ':exclamation: There are no application!'
@@ -112,14 +112,16 @@ class Cadre(Cog_Extension):
         if data is None:
             await ctx.send(f':exclamation: There are no applicant whose Id is {delete_id}!')
 
-        member_name = data["name"]
+        member_name = await self.bot.guilds[0].fetch_member(data["_id"])
+        if member_name is None:
+            member_name = await self.bot.fetch_user(data["_id"])
 
         cadre_cursor.delete_one({"_id": delete_id})
         await ctx.send(f'Member {member_name}({delete_id})\'s application has been removed!')
 
         await func.getChannel(self.bot, '_Report').send(
             f'[Command]Group ca - remove used by member {ctx.author.id}. {func.now_time_info("whole")}')
-    
+
     # department role update
     @commands.command()
     async def role_update(self, ctx, *, msg):

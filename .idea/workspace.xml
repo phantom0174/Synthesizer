@@ -20,15 +20,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c035de0c-f75c-43e0-93a7-043046e0d077" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/keep_alive.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/main.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/main.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cogs/task.py" beforeDir="false" afterPath="$PROJECT_DIR$/cogs/task.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/setup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cogs/cadre.py" beforeDir="false" afterPath="$PROJECT_DIR$/cogs/cadre.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
