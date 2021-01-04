@@ -104,6 +104,22 @@ class Cadre(Cog_Extension):
         await func.getChannel(self.bot, '_Report').send(
             f'[Command]Group ca - search used by member {ctx.author.id}. {func.now_time_info("whole")}')
 
+    @ca.command()
+    async def remove(self, ctx, delete_id: int):
+        cadre_cursor = client["cadre"]
+        data = cadre_cursor.find_one({"_id": delete_id})
+
+        if data is None:
+            await ctx.send(f':exclamation: There are no applicant whose Id is {delete_id}!')
+
+        member_name = data["name"]
+
+        cadre_cursor.delete_one({"_id": delete_id})
+        await ctx.send(f'Member {member_name}({delete_id})\'s application has been removed!')
+
+        await func.getChannel(self.bot, '_Report').send(
+            f'[Command]Group ca - remove used by member {ctx.author.id}. {func.now_time_info("whole")}')
+    
     # department role update
     @commands.command()
     async def role_update(self, ctx, *, msg):
