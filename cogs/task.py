@@ -20,7 +20,7 @@ class Task(Cog_Extension):
         fluctlight_client = MongoClient(link)["LightCube"]
         fluctlight_cursor = fluctlight_client["light-cube-info"]
 
-        data = fluctlight_cursor.find({"deep_freeze": {"$eq": 0}}, {"score": 1})
+        data = fluctlight_cursor.find({"deep_freeze": {"$eq": 0}}, {"score": 1}, sort=[("score", -1)])
 
         for member in data:
             member_name = (await self.bot.guilds[0].fetch_member(member["_id"])).nick
