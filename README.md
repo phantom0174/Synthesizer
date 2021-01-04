@@ -2,8 +2,7 @@
 ![](https://img.shields.io/uptimerobot/ratio/7/m786446893-8cac5f09f7d2376db4839510)
 ![](https://img.shields.io/uptimerobot/ratio/m786446893-8cac5f09f7d2376db4839510)
 <br>
-![](https://i.imgur.com/H5OiNY3t.jpg)
-![](https://i.imgur.com/hvb9x1ct.jpg)
+<img src="https://upload.cc/i1/2021/01/04/y0wpXS.jpg" width=200> 　　　　<img src="https://upload.cc/i1/2021/01/04/N8sInJ.png" width=200>
 <br>
 
 ## 🔧 Developer
@@ -16,6 +15,7 @@
 - 2020/11/25: Intents activate.
 - ~2020/12/15: Almost same as SQCS Bot.
 - 2020/12/21: Move database to MongoDB.
+- 2021/1/4: Score Board move to web.
 ```
 
 ## ✅ Open-source
