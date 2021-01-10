@@ -4,8 +4,7 @@ import core.functions as func
 import discord
 import sys
 import os
-
-# import keep_alive
+import keep_alive
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='sc!', intents=intents)
@@ -68,7 +67,7 @@ for filename in os.listdir('./cogs'):
         bot.load_extension(f'cogs.{filename[:-3]}')
 
 
-# keep_alive.keep_alive()
+keep_alive.keep_alive()
 
 if __name__ == '__main__':
     bot.run(os.environ.get("TOKEN"))
